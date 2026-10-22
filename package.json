@@ -1,0 +1,12 @@
+{
+  "name": "license-admin",
+  "version": "1.0.0",
+  "description": "License key admin panel with login, device limits and validation API (zero dependencies)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
