@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>License Admin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237c5cff'/%3E%3Cpath d='M11 15a5 5 0 1 1 4.6 5H14v2h-2v2H9v-3.5l5.2-5.2A5 5 0 0 1 11 15z' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#07070d; --panel:rgba(20,20,34,.62); --panel-2:rgba(255,255,255,.04);
+  --line:rgba(255,255,255,.09); --text:#ecebf5; --muted:#9a98b5;
+  --brand:#7c5cff; --brand-2:#22d3ee; --ok:#34d399; --warn:#fbbf24; --bad:#fb7185;
+  --radius:18px;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--text);
+  font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+/* animated background */
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.bg::before{content:"";position:absolute;inset:0;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:56px 56px;opacity:.35;
+  mask-image:radial-gradient(ellipse at 50% 30%,#000 10%,transparent 70%);
+  -webkit-mask-image:radial-gradient(ellipse at 50% 30%,#000 10%,transparent 70%)}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;animation:float 18s ease-in-out infinite}
+.o1{width:520px;height:520px;background:#5b3df5;top:-160px;left:-120px}
+.o2{width:460px;height:460px;background:#06b6d4;bottom:-180px;right:-100px;animation-delay:-6s}
+.o3{width:340px;height:340px;background:#c026d3;top:40%;left:55%;opacity:.28;animation-delay:-12s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(50px,-40px) scale(1.12)}}
+@media (prefers-reduced-motion:reduce){.orb{animation:none}}
+
+button,input,select{font:inherit;color:inherit}
+.glass{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 20px 60px -20px rgba(0,0,0,.6)}
+.hidden{display:none!important}
+
+/* buttons / inputs */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);
+  background:var(--panel-2);padding:9px 14px;border-radius:12px;cursor:pointer;transition:.18s;white-space:nowrap}
+.btn:hover{background:rgba(255,255,255,.09);transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn.primary{background:linear-gradient(135deg,var(--brand),#5b8cff 60%,var(--brand-2));border-color:transparent;font-weight:600;
+  box-shadow:0 10px 30px -10px rgba(124,92,255,.9)}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.danger{color:var(--bad)} .btn.danger:hover{background:rgba(251,113,133,.14)}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:10px}
+.input{width:100%;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;padding:11px 13px;outline:none;transition:.15s}
+.input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(124,92,255,.25)}
+.input::placeholder{color:#6b6987}
+label.l{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:600}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+/* login */
+#login{min-height:100%;display:grid;place-items:center;padding:24px}
+.login-card{width:100%;max-width:410px;padding:34px}
+.logo{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;margin-bottom:18px;
+  background:linear-gradient(135deg,var(--brand),var(--brand-2));box-shadow:0 12px 34px -8px rgba(124,92,255,.9)}
+.login-card h1{font-size:24px;letter-spacing:-.02em}
+.login-card p.sub{color:var(--muted);margin:4px 0 24px}
+.field{margin-bottom:16px}
+.err{color:var(--bad);font-size:13.5px;min-height:20px;margin:-4px 0 10px}
+
+/* layout */
+#app{max-width:1240px;margin:0 auto;padding:22px 20px 60px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px;letter-spacing:-.01em}
+.brand .logo{margin:0;width:40px;height:40px;border-radius:12px}
+.brand small{display:block;color:var(--muted);font-weight:500;font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.stat{padding:16px 18px}
+.stat .n{font-size:30px;font-weight:700;letter-spacing:-.03em}
+.stat .t{color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.07em}
+.stat.a .n{color:var(--ok)} .stat.u .n{color:var(--brand-2)} .stat.e .n{color:var(--bad)}
+.grid{display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start}
+.card{padding:22px}
+.card h2{font-size:16px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* chips + segmented */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 14px;border-radius:11px;border:1px solid var(--line);background:var(--panel-2);cursor:pointer;transition:.15s;user-select:none}
+.chip:hover{background:rgba(255,255,255,.09)}
+.chip.on{background:rgba(124,92,255,.25);border-color:var(--brand);color:#fff;box-shadow:0 0 0 3px rgba(124,92,255,.15)}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;padding:4px}
+.seg button{border:0;background:transparent;padding:8px;border-radius:9px;cursor:pointer;transition:.15s;color:var(--muted)}
+.seg button.on{background:rgba(124,92,255,.3);color:#fff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stepper{display:flex;gap:6px}
+.stepper .btn{padding:0 13px}
+.stepper input{text-align:center}
+.switch{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.switch .tr{width:42px;height:24px;border-radius:99px;background:rgba(255,255,255,.12);position:relative;transition:.2s;flex:none}
+.switch .tr::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+.switch.on .tr{background:var(--brand)} .switch.on .tr::after{left:21px}
+.switch span.d{font-size:13px;color:var(--muted);display:block}
+
+/* result box */
+.result{margin-top:16px;padding:14px;border-radius:14px;border:1px dashed rgba(52,211,153,.5);background:rgba(52,211,153,.07)}
+.result .keys{max-height:180px;overflow:auto;margin:10px 0;display:grid;gap:6px}
+.keyline{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;background:rgba(0,0,0,.3);border-radius:10px}
+
+/* table */
+.tools{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.tools .input{flex:1;min-width:180px}
+.tools select{width:auto}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:10px 12px;font-weight:600;border-bottom:1px solid var(--line)}
+td{padding:13px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr{transition:.15s} tbody tr:hover{background:rgba(255,255,255,.035)}
+.key{cursor:pointer;font-size:13.5px;letter-spacing:.02em}
+.key:hover{color:var(--brand-2)}
+.note{color:var(--muted);font-size:12.5px;margin-top:2px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:12.5px;font-weight:600}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.active{color:var(--ok);background:rgba(52,211,153,.12)}
+.pill.unused{color:var(--brand-2);background:rgba(34,211,238,.12)}
+.pill.expired{color:var(--bad);background:rgba(251,113,133,.12)}
+.muted{color:var(--muted)} .small{font-size:12.5px}
+.acts{display:flex;gap:6px;justify-content:flex-end}
+.empty{text-align:center;padding:44px 10px;color:var(--muted)}
+.bar{height:5px;border-radius:9px;background:rgba(255,255,255,.1);margin-top:6px;width:90px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-2))}
+
+/* modal + toast */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:grid;place-items:center;padding:20px;z-index:50}
+.modal .box{width:100%;max-width:420px;padding:24px;animation:pop .18s ease}
+@keyframes pop{from{transform:scale(.96);opacity:0}}
+.modal h3{margin-bottom:6px} .modal p{color:var(--muted);margin-bottom:16px}
+.modal .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+#toasts{position:fixed;bottom:20px;right:20px;display:grid;gap:8px;z-index:99}
+.toast{padding:12px 16px;border-radius:12px;background:#1b1b2e;border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.5);animation:pop .2s ease}
+.toast.bad{border-color:rgba(251,113,133,.6)} .toast.ok{border-color:rgba(52,211,153,.6)}
+
+@media (max-width:980px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="bg"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+
+<!-- LOGIN -->
+<section id="login" class="hidden">
+  <form class="glass login-card" id="loginForm" autocomplete="on">
+    <div class="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2 20 3m-4 0 3 3m-6 0 2 2"/></svg></div>
+    <h1>Admin Login</h1>
+    <p class="sub">Sign in to manage licenses</p>
+    <div class="field"><label class="l" for="u">Username</label><input class="input" id="u" name="username" autocomplete="username" required autofocus></div>
+    <div class="field"><label class="l" for="p">Password</label><input class="input" id="p" name="password" type="password" autocomplete="current-password" required></div>
+    <div class="err" id="loginErr"></div>
+    <button class="btn primary" style="width:100%;padding:12px" id="loginBtn">Sign in</button>
+  </form>
+</section>
+
+<!-- APP -->
+<main id="app" class="hidden">
+  <header class="top">
+    <div class="brand">
+      <div class="logo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2 20 3m-4 0 3 3m-6 0 2 2"/></svg></div>
+      <div>License Admin<small id="who"></small></div>
+    </div>
+    <button class="btn" id="logout">Sign out</button>
+  </header>
+
+  <div class="stats">
+    <div class="glass stat"><div class="n" id="sTotal">0</div><div class="t">Total</div></div>
+    <div class="glass stat a"><div class="n" id="sActive">0</div><div class="t">Active</div></div>
+    <div class="glass stat u"><div class="n" id="sUnused">0</div><div class="t">Unused</div></div>
+    <div class="glass stat e"><div class="n" id="sExpired">0</div><div class="t">Expired</div></div>
+  </div>
+
+  <div class="grid">
+    <!-- GENERATE -->
+    <section class="glass card">
+      <h2>✨ Generate license</h2>
+
+      <div class="field">
+        <label class="l">Duration</label>
+        <div class="chips" id="durChips">
+          <div class="chip" data-d="1">1 day</div>
+          <div class="chip" data-d="3">3 days</div>
+          <div class="chip on" data-d="7">7 days</div>
+          <div class="chip" data-d="30">30 days</div>
+          <div class="chip" data-d="custom">Custom</div>
+        </div>
+        <input class="input hidden" id="customDays" type="number" min="1" max="3650" placeholder="Number of days" style="margin-top:10px">
+      </div>
+
+      <div class="row2 field">
+        <div>
+          <label class="l">Devices allowed</label>
+          <div class="stepper">
+            <button type="button" class="btn" id="devMinus">−</button>
+            <input class="input" id="maxDev" type="number" min="1" max="10000" value="1">
+            <button type="button" class="btn" id="devPlus">+</button>
+          </div>
+        </div>
+        <div>
+          <label class="l">Quantity</label>
+          <input class="input" id="qty" type="number" min="1" max="500" value="1">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="l">Key type</label>
+        <div class="seg" id="keyMode"><button type="button" class="on" data-m="auto">Auto</button><button type="button" data-m="custom">Custom</button></div>
+        <input class="input hidden mono" id="customKey" placeholder="MY-CUSTOM-KEY" maxlength="64" style="margin-top:10px" spellcheck="false">
+        <div class="muted small" id="keyHint" style="margin-top:8px">Format: <span class="mono">XXXX-XXXX-XXXX-XXXX-XXXX</span></div>
+      </div>
+
+      <div class="field">
+        <div class="switch" id="sofu" role="switch" tabindex="0">
+          <div class="tr"></div>
+          <div>Start timer on first use<span class="d">Off = the countdown starts now</span></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="l">Note (optional)</label>
+        <input class="input" id="note" maxlength="200" placeholder="Customer name, order #…">
+      </div>
+
+      <button class="btn primary" style="width:100%;padding:12px" id="genBtn">Generate</button>
+
+      <div class="result hidden" id="result">
+        <div style="font-weight:600">Created <span id="resCount"></span></div>
+        <div class="keys" id="resKeys"></div>
+        <button class="btn sm" id="copyAll">Copy all</button>
+      </div>
+    </section>
+
+    <!-- LIST -->
+    <section class="glass card">
+      <h2>🔑 Licenses</h2>
+      <div class="tools">
+        <input class="input" id="search" placeholder="Search key or note…">
+        <select class="input" id="filter">
+          <option value="all">All</option><option value="active">Active</option>
+          <option value="unused">Unused</option><option value="expired">Expired</option>
+        </select>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Key</th><th>Status</th><th>Expires</th><th>Devices</th><th></th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="empty hidden" id="empty">No licenses yet. Generate your first one.</div>
+    </section>
+  </div>
+</main>
+
+<div id="modal" class="modal hidden"><div class="glass box" id="modalBox"></div></div>
+<div id="toasts"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s) => document.querySelector(s);
+const DAY = 86400000;
+let licenses = [];
+let state = { days: 7, mode: 'auto', sofu: false };
+
+/* ---------- tiny helpers ---------- */
+function h(tag, props = {}, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'text') el.textContent = v;
+    else el.setAttribute(k, v);
+  }
+  kids.flat().forEach((c) => c != null && el.append(c.nodeType ? c : document.createTextNode(c)));
+  return el;
+}
+async function api(path, method = 'GET', body) {
+  const res = await fetch('/api' + path, {
+    method, credentials: 'same-origin',
+    headers: body ? { 'Content-Type': 'application/json' } : {},
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && path !== '/login') { showLogin(); throw new Error('Session expired. Please sign in.'); }
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+function toast(msg, type = 'ok') {
+  const t = h('div', { class: 'toast ' + type, text: msg });
+  $('#toasts').append(t);
+  setTimeout(() => t.remove(), 3200);
+}
+async function copy(text, label = 'Copied') {
+  try { await navigator.clipboard.writeText(text); }
+  catch (_) {
+    const ta = h('textarea'); ta.value = text; document.body.append(ta); ta.select();
+    document.execCommand('copy'); ta.remove();
+  }
+  toast(label);
+}
+function fmtDate(ts) {
+  return new Date(ts).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+function rel(ts) {
+  const d = ts - Date.now(), a = Math.abs(d);
+  const m = Math.floor(a / 60000), hr = Math.floor(a / 3600000), dy = Math.floor(a / DAY);
+  const s = dy >= 1 ? dy + 'd' : hr >= 1 ? hr + 'h' : Math.max(m, 1) + 'm';
+  return d >= 0 ? 'in ' + s : s + ' ago';
+}
+
+/* ---------- modal ---------- */
+function openModal(...content) {
+  const box = $('#modalBox'); box.replaceChildren(...content);
+  $('#modal').classList.remove('hidden');
+}
+function closeModal() { $('#modal').classList.add('hidden'); }
+$('#modal').addEventListener('mousedown', (e) => { if (e.target.id === 'modal') closeModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+/* ---------- auth views ---------- */
+function showLogin() {
+  $('#app').classList.add('hidden'); $('#login').classList.remove('hidden');
+  $('#u').focus();
+}
+async function showApp(user) {
+  $('#login').classList.add('hidden'); $('#app').classList.remove('hidden');
+  $('#who').textContent = 'Signed in as ' + user;
+  await load();
+}
+$('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = $('#loginBtn'); btn.disabled = true; $('#loginErr').textContent = '';
+  try {
+    await api('/login', 'POST', { username: $('#u').value, password: $('#p').value });
+    $('#p').value = '';
+    const me = await api('/me');
+    showApp(me.user);
+  } catch (err) { $('#loginErr').textContent = err.message; }
+  btn.disabled = false;
+});
+$('#logout').addEventListener('click', async () => { await api('/logout', 'POST').catch(() => {}); showLogin(); });
+
+/* ---------- generate form ---------- */
+$('#durChips').addEventListener('click', (e) => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  document.querySelectorAll('#durChips .chip').forEach((x) => x.classList.remove('on'));
+  c.classList.add('on');
+  const custom = c.dataset.d === 'custom';
+  $('#customDays').classList.toggle('hidden', !custom);
+  if (custom) $('#customDays').focus(); else state.days = Number(c.dataset.d);
+});
+$('#devMinus').onclick = () => { const i = $('#maxDev'); i.value = Math.max(1, (+i.value || 1) - 1); };
+$('#devPlus').onclick = () => { const i = $('#maxDev'); i.value = Math.min(10000, (+i.value || 1) + 1); };
+$('#keyMode').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  state.mode = b.dataset.m;
+  document.querySelectorAll('#keyMode button').forEach((x) => x.classList.toggle('on', x === b));
+  const custom = state.mode === 'custom';
+  $('#customKey').classList.toggle('hidden', !custom);
+  $('#qty').disabled = custom; if (custom) $('#qty').value = 1;
+  $('#keyHint').innerHTML = custom
+    ? 'Letters, numbers, <span class="mono">-</span> and <span class="mono">_</span> (4–64 chars)'
+    : 'Format: <span class="mono">XXXX-XXXX-XXXX-XXXX-XXXX</span>';
+  if (custom) $('#customKey').focus();
+});
+const sofu = $('#sofu');
+const toggleSofu = () => { state.sofu = !state.sofu; sofu.classList.toggle('on', state.sofu); sofu.setAttribute('aria-checked', state.sofu); };
+sofu.onclick = toggleSofu;
+sofu.onkeydown = (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleSofu(); } };
+
+let lastKeys = [];
+$('#genBtn').addEventListener('click', async () => {
+  const days = document.querySelector('#durChips .chip.on').dataset.d === 'custom' ? Number($('#customDays').value) : state.days;
+  const body = {
+    days, maxDevices: Number($('#maxDev').value), quantity: Number($('#qty').value) || 1,
+    startOnFirstUse: state.sofu, note: $('#note').value,
+    customKey: state.mode === 'custom' ? $('#customKey').value : '',
+  };
+  if (state.mode === 'custom' && !body.customKey.trim()) return toast('Enter a custom key', 'bad');
+  const btn = $('#genBtn'); btn.disabled = true;
+  try {
+    const { licenses: made } = await api('/licenses', 'POST', body);
+    lastKeys = made.map((l) => l.key);
+    $('#resCount').textContent = made.length + (made.length === 1 ? ' license' : ' licenses');
+    $('#resKeys').replaceChildren(...made.slice(0, 50).map((l) =>
+      h('div', { class: 'keyline' }, h('span', { class: 'mono', text: l.key }),
+        h('button', { class: 'btn sm', onclick: () => copy(l.key, 'Key copied'), text: 'Copy' }))));
+    if (made.length > 50) $('#resKeys').append(h('div', { class: 'muted small', text: '…and ' + (made.length - 50) + ' more (use Copy all)' }));
+    $('#result').classList.remove('hidden');
+    if (state.mode === 'custom') $('#customKey').value = '';
+    toast('License generated');
+    await load();
+  } catch (err) { toast(err.message, 'bad'); }
+  btn.disabled = false;
+});
+$('#copyAll').onclick = () => copy(lastKeys.join('\n'), 'All keys copied');
+
+/* ---------- list ---------- */
+async function load() {
+  try { ({ licenses } = await api('/licenses')); render(); }
+  catch (err) { toast(err.message, 'bad'); }
+}
+$('#search').addEventListener('input', render);
+$('#filter').addEventListener('change', render);
+
+function render() {
+  const c = { active: 0, unused: 0, expired: 0 };
+  licenses.forEach((l) => c[l.status]++);
+  $('#sTotal').textContent = licenses.length;
+  $('#sActive').textContent = c.active; $('#sUnused').textContent = c.unused; $('#sExpired').textContent = c.expired;
+
+  const q = $('#search').value.trim().toLowerCase(), f = $('#filter').value;
+  const list = licenses.filter((l) => (f === 'all' || l.status === f) &&
+    (!q || l.key.toLowerCase().includes(q) || l.note.toLowerCase().includes(q)));
+
+  $('#empty').classList.toggle('hidden', list.length > 0);
+  $('#empty').textContent = licenses.length ? 'No licenses match your filter.' : 'No licenses yet. Generate your first one.';
+
+  $('#rows').replaceChildren(...list.map((l) => {
+    const pct = Math.min(100, (l.devices.length / l.maxDevices) * 100);
+    const exp = l.expiresAt == null
+      ? h('div', {}, h('span', { class: 'muted', text: 'Starts on first use' }), h('div', { class: 'small muted', text: l.durationDays + ' day' + (l.durationDays > 1 ? 's' : '') }))
+      : h('div', {}, h('div', { text: fmtDate(l.expiresAt) }), h('div', { class: 'small muted', text: rel(l.expiresAt) }));
+    return h('tr', {},
+      h('td', {},
+        h('div', { class: 'key mono', title: 'Click to copy', onclick: () => copy(l.key, 'Key copied'), text: l.key }),
+        l.note ? h('div', { class: 'note', title: l.note, text: l.note }) : null),
+      h('td', {}, h('span', { class: 'pill ' + l.status, text: l.status[0].toUpperCase() + l.status.slice(1) })),
+      h('td', {}, exp),
+      h('td', {},
+        h('div', { text: l.devices.length + ' / ' + l.maxDevices }),
+        h('div', { class: 'bar' }, h('i', { style: 'width:' + pct + '%' }))),
+      h('td', {}, h('div', { class: 'acts' },
+        h('button', { class: 'btn sm', onclick: () => extendModal(l), text: 'Extend' }),
+        h('button', { class: 'btn sm', onclick: () => manageModal(l), text: 'Manage' }),
+        h('button', { class: 'btn sm danger', onclick: () => deleteModal(l), text: 'Delete' }))));
+  }));
+}
+
+/* ---------- row modals ---------- */
+function extendModal(l) {
+  let days = 7;
+  const chips = [1, 3, 7, 30].map((d) => h('div', { class: 'chip' + (d === 7 ? ' on' : ''), 'data-d': d, text: '+' + d + (d > 1 ? ' days' : ' day') }));
+  const custom = h('input', { class: 'input', type: 'number', min: 1, max: 3650, placeholder: 'Custom days', style: 'margin-top:10px' });
+  const chipBox = h('div', { class: 'chips' }, chips);
+  chipBox.addEventListener('click', (e) => {
+    const c = e.target.closest('.chip'); if (!c) return;
+    chips.forEach((x) => x.classList.remove('on')); c.classList.add('on');
+    days = Number(c.dataset.d); custom.value = '';
+  });
+  custom.addEventListener('input', () => { chips.forEach((x) => x.classList.remove('on')); days = Number(custom.value); });
+  const go = h('button', { class: 'btn primary', text: 'Extend', onclick: async () => {
+    try { await api('/licenses/' + l.id + '/extend', 'POST', { days }); toast('Extended by ' + days + ' day(s)'); closeModal(); load(); }
+    catch (e) { toast(e.message, 'bad'); }
+  } });
+  openModal(h('h3', { text: 'Extend license' }), h('p', { class: 'mono small', text: l.key }), chipBox, custom,
+    h('div', { class: 'foot' }, h('button', { class: 'btn', text: 'Cancel', onclick: closeModal }), go));
+}
+function manageModal(l) {
+  const max = h('input', { class: 'input', type: 'number', min: 1, max: 10000, value: l.maxDevices });
+  const note = h('input', { class: 'input', maxlength: 200, value: l.note });
+  const devs = l.devices.length
+    ? l.devices.map((d) => h('div', { class: 'keyline' }, h('span', { class: 'mono small', text: d.id.length > 28 ? d.id.slice(0, 28) + '…' : d.id }), h('span', { class: 'muted small', text: rel(d.lastSeen) })))
+    : [h('div', { class: 'muted small', text: 'No devices activated yet' })];
+  const save = async (extra = {}) => {
+    try { await api('/licenses/' + l.id, 'PATCH', { maxDevices: Number(max.value), note: note.value, ...extra }); toast('Saved'); closeModal(); load(); }
+    catch (e) { toast(e.message, 'bad'); }
+  };
+  openModal(h('h3', { text: 'Manage license' }), h('p', { class: 'mono small', text: l.key }),
+    h('label', { class: 'l', text: 'Devices allowed' }), max,
+    h('label', { class: 'l', style: 'margin-top:14px', text: 'Note' }), note,
+    h('label', { class: 'l', style: 'margin-top:14px', text: 'Activated devices (' + l.devices.length + ')' }),
+    h('div', { style: 'display:grid;gap:6px;max-height:150px;overflow:auto' }, devs),
+    h('div', { class: 'foot' },
+      h('button', { class: 'btn danger', text: 'Reset devices', onclick: () => save({ resetDevices: true }) }),
+      h('button', { class: 'btn', text: 'Cancel', onclick: closeModal }),
+      h('button', { class: 'btn primary', text: 'Save', onclick: () => save() })));
+}
+function deleteModal(l) {
+  openModal(h('h3', { text: 'Delete license?' }),
+    h('p', {}, 'This permanently removes ', h('span', { class: 'mono', text: l.key }), '. The key will stop working immediately.'),
+    h('div', { class: 'foot' }, h('button', { class: 'btn', text: 'Cancel', onclick: closeModal }),
+      h('button', { class: 'btn primary', style: 'background:var(--bad);box-shadow:none', text: 'Delete', onclick: async () => {
+        try { await api('/licenses/' + l.id, 'DELETE'); toast('License deleted'); closeModal(); load(); }
+        catch (e) { toast(e.message, 'bad'); }
+      } })));
+}
+
+/* ---------- boot ---------- */
+setInterval(() => { if (!$('#app').classList.contains('hidden')) render(); }, 60000);
+api('/me').then((me) => showApp(me.user)).catch(() => showLogin());
+})();
+</script>
+</body>
+</html>
